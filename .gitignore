@@ -1,0 +1,10 @@
+# Editor cruft
+.idea/
+
+# Build cruft
+*.egg-info/
+.tox/
+
+# Logging/homework cruft
+*.log
+
