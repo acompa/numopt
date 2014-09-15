@@ -1,5 +1,6 @@
 # Editor cruft
 .idea/
+.DS_Store
 
 # Build cruft
 *.egg-info/
