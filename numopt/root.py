@@ -56,8 +56,8 @@ def bisection(func, left, right, maxit, epsilon=0.0):
         raise ValueError("Left and right interval endpoints do not seem to contain a zero!")
 
     logging.info("\nStarting bisection method!")
-    the_iter = 0
-    while the_iter < maxit:
+    the_iter = 1
+    while the_iter <= maxit:
         f_left = func(left)
         f_right = func(right)
         logging.info("Iteration {0}:  [{1:.16f}, {2:.16f}], f(left) = {3:.16f}, "
@@ -106,10 +106,10 @@ def secant(func, prev, current, maxit):
         # TODO (ac) what do I do here?
         return None, (None, None)
 
-    the_iter = 0
+    the_iter = 1
     logging.info("\nStarting secant iterations! Initial iterates: {0:.16f}, {1:.16f}".format(
         prev, current))
-    while the_iter < maxit:
+    while the_iter <= maxit:
         next_value = _secant_update(current, prev, f_current, f_prev)
         f_next = func(next_value)
         logging.info("Iteration {0}: x={1:.16f}, f(x)={2:.16f}".format(
@@ -148,10 +148,10 @@ def regula_falsi(func, star, current, maxit):
     if f_star * f_current >= 0:
         raise ValueError("f(x0) and f(x1) must have different signs.")
 
-    the_iter = 0
+    the_iter = 1
     logging.info("\nStarting regula falsi iterations! Initial iterates: {0:.16f}, {1:.16f}".format(
         star, current))
-    while the_iter < maxit:
+    while the_iter <= maxit:
         next_value = _secant_update(current, star, f_current, f_star)
         f_next = func(next_value)
         logging.info("Iteration {0}: x={1:.16f}, f(x)={2:.16f}".format(
@@ -195,10 +195,10 @@ def wheeler(func, star, current, maxit):
         return None, (None, None)
 
     mu = 1.0
-    the_iter = 0
+    the_iter = 1
     logging.info("\nStarting Wheeler's iterations! Initial iterates: {0:.16f}, {1:.16f}".format(
         star, current))
-    while the_iter < maxit:
+    while the_iter <= maxit:
         next_value = _secant_update(current, star, f_current, mu * f_star)
         f_next = func(next_value)
         logging.info("Iteration {0}: x={1:.16f}, f(x)={2:.16f}".format(
@@ -235,9 +235,9 @@ def newton(func, derivative, value, maxit):
     :rtype: float
     """
     f_value = func(value)
-    the_iter = 0
+    the_iter = 1
     logging.info("\nStarting Newton's iterations! Initial value = {0:.16f}".format(value))
-    while the_iter < maxit:
+    while the_iter <= maxit:
         next_value = value - f_value / derivative(value)
         f_next = func(next_value)
         logging.info("Iteration {0}: x={1:.16f}, f(x)={2:.16f}".format(
