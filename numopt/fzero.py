@@ -7,6 +7,7 @@ for details.
 
 @author alex, 9/21/2014
 """
+from __future__ import division
 
 import math
 import logging
@@ -95,7 +96,8 @@ def fzerotx(f, x0, x1):
             d = m
             e = m
             logging.info(
-                "Rejecting interpolation step d={0}. Using bisection={1}.".format(p/q, d))
+                "Rejecting interpolation step d={0}, b={1}. Using bisection={2}.".format(
+                    p/q, b + (p/q), d))
 
         # Evaluate f at next iterate
         c = b
