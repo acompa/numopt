@@ -13,8 +13,8 @@ import math
 import logging
 from sys import stdout
 
-# logging.basicConfig(filename="fzerotx.log", level=logging.INFO)
-logging.basicConfig(level=logging.INFO, stream=stdout)
+logging.basicConfig(filename="fzerotx.log", level=logging.INFO)
+# logging.basicConfig(level=logging.INFO, stream=stdout)
 
 def fzerotx(f, x0, x1):
     """
@@ -37,6 +37,7 @@ def fzerotx(f, x0, x1):
         raise ValueError("f(a)={0} and f(b)={1} have the same sign".format(fa, fb))
 
     c = a
+    logging.info("Starting with a secant step...")
     fc = fa
     d = b - c
     e = d
@@ -44,17 +45,22 @@ def fzerotx(f, x0, x1):
     # The main loop
     while fb != 0:
         if fa * fb > 0:
+            logging.info("f({0}) = {1} and f({2}) = {3} have the same sign. Will not use IQI.".format(
+                a, fa, b, fb))
             a = c
             fa = fc
             d = b - c
             e = d
         if abs(fa) < abs(fb):
+            logging.info("|f({0})| = {1} < |f({2})| = {3}. Will not use IQI.".format(
+                a, abs(fa), b, abs(fb)))
             c = b
             b = a
             a = c
             fc = fb
             fb = fa
             fa = fc
+        logging.info("** NEW ITERATION! Examining [a, b] = [{0}, {1}]".format(a, b))
 
         # Check for convergence
         m = 0.5 * (a - b)
@@ -69,35 +75,42 @@ def fzerotx(f, x0, x1):
             e = m
         else:
             s = fb / fc
+            logging.info("a={0}, c={1}. Taking a {2} step.".format(
+                a, c, "secant" if a == c else "IQI"))
+            # Secant
             if a == c:
-                logging.info("a={0} == c={1}. Taking a secant step.".format(a, c))
                 p = 2.0 * m * s
                 q = 1.0 - s
+            # IQI
             else:
-                logging.info("a={0} != c={1}. Taking an IQI step.".format(a, c))
                 q = fc / fa
                 r = fb / fa
                 p = s * (2.0 * m * q * (q - r) - (b - c) * (r - 1.0))
                 q = (q - 1.0) * (r - 1.0) * (s - 1.0)
 
-        if p > 0:
-            logging.info("Flipping sign on q = {0}".format(q))
-            q = -q
-        else:
-            logging.info("Flipping sign on p = {0}".format(p))
-            p = -p
+            if p > 0:
+                logging.info("Flipping sign on q = {0}".format(q))
+                q = -q
+            else:
+                logging.info("Flipping sign on p = {0}".format(p))
+                p = -p
 
-        # Do we accept the interpolation (secant/IQI) step?
-        if 2.0 * p < 3.0 * m * q - abs(tol * q) and p < abs(0.5 * e * q):
-            e = d
-            d = p / q
-            logging.info("Accepting interpolation step d={0}".format(d))
-        else:
-            d = m
-            e = m
-            logging.info(
-                "Rejecting interpolation step d={0}, b={1}. Using bisection={2}.".format(
-                    p/q, b + (p/q), d))
+            # Do we accept the interpolation (secant/IQI) step?
+            if 2.0 * p < 3.0 * m * q - abs(tol * q) and p < abs(0.5 * e * q):
+                e = d
+                d = p / q
+                logging.info("Accepting interpolation step d={0}".format(d))
+            else:
+                log_string = "Rejecting interpolation step d={0} (iterate={1}) since ".format(
+                    p/q, b + (p/q))
+                if 2.0 * p >= 3.0 * m * q:
+                    log_string += "2.0 * {0} => 3.0 * {1} * {2} = {3}".format(p, m, q, 3.0*m*q)
+                else:
+                    log_string += "{0} => abs(0.5 * {1} * {2}) = {3}".format(p, e, q, abs(0.5*e*q))
+                logging.info(log_string)
+                d = m
+                e = m
+                logging.info("Using bisection step d={0}".format(d))
 
         # Evaluate f at next iterate
         c = b
@@ -107,19 +120,9 @@ def fzerotx(f, x0, x1):
         else:
             b -= math.copysign(tol, b - a)
         fb = f(b)
-        logging.info("Next iterate = {0}".format(b))
+        logging.info("Next iterate = {0}. f(x) = {1}".format(b, fb))
 
     logging.info("CONVERGED! b = {0}, f(b) = {1}".format(b, fb))
     return b
 
 
-if __name__ == "__main__":
-    f1 = lambda x: 2 * x ** 3 - 4 * x ** 2 + 3 * x + 1
-    x0, x1 = (-2, 2)
-    logging.info("ANALYZING f = 2x^3 - 4x^2 + 3x + 1")
-    fzerotx(f1, x0, x1)
-
-    f2 = lambda x: 1.1 * x ** 3 - 2.6 * x - 2.6049
-    x0, x1 = (-1.95, 2.4)
-    logging.info("\nANALYZING f = 1.1x^3 - 2.6x - 2.6049")
-    fzerotx(f2, x0, x1)
