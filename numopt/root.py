@@ -1,12 +1,10 @@
 """
 Methods for one-dimensional root-finding.
 
-@author alex, 9/.16/2014
+@author alex, 9/16/2014
 """
 from __future__ import division
 import logging
-
-logging.basicConfig(filename="root.log", level=logging.INFO)
 
 
 def _check_initial_value(f_initial, initial):
