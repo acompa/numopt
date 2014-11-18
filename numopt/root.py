@@ -6,6 +6,11 @@ Methods for one-dimensional root-finding.
 from __future__ import division
 import logging
 
+fh = logging.FileHandler('root.log')
+fh.setLevel(logging.INFO)
+logger = logging.getLogger('root')
+logger.addHandler(fh)
+
 
 def _check_initial_value(f_initial, initial):
     """

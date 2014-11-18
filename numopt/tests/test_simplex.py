@@ -12,8 +12,6 @@ from unittest import TestCase
 
 from numopt import simplex as undertest
 
-logging.basicConfig(filename="simplex.log", level=logging.INFO)
-
 
 class SimplexTests(TestCase):
 

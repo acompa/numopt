@@ -13,8 +13,11 @@ import math
 import logging
 from sys import stdout
 
-logging.basicConfig(filename="fzerotx.log", level=logging.INFO)
-# logging.basicConfig(level=logging.INFO, stream=stdout)
+fh = logging.FileHandler("fzerotx.log")
+fh.setLevel(logging.INFO)
+logger = logging.getLogger('fzerotx')
+logger.addHandler(fh)
+
 
 def fzerotx(f, x0, x1):
     """
@@ -37,7 +40,7 @@ def fzerotx(f, x0, x1):
         raise ValueError("f(a)={0} and f(b)={1} have the same sign".format(fa, fb))
 
     c = a
-    logging.info("Starting with a secant step...")
+    logger.info("Starting with a secant step...")
     fc = fa
     d = b - c
     e = d
@@ -45,14 +48,14 @@ def fzerotx(f, x0, x1):
     # The main loop
     while fb != 0:
         if fa * fb > 0:
-            logging.info("f({0}) = {1} and f({2}) = {3} have the same sign. Will not use IQI.".format(
+            logger.info("f({0}) = {1} and f({2}) = {3} have the same sign. Will not use IQI.".format(
                 a, fa, b, fb))
             a = c
             fa = fc
             d = b - c
             e = d
         if abs(fa) < abs(fb):
-            logging.info("|f({0})| = {1} < |f({2})| = {3}. Will not use IQI.".format(
+            logger.info("|f({0})| = {1} < |f({2})| = {3}. Will not use IQI.".format(
                 a, abs(fa), b, abs(fb)))
             c = b
             b = a
@@ -60,7 +63,7 @@ def fzerotx(f, x0, x1):
             fc = fb
             fb = fa
             fa = fc
-        logging.info("** NEW ITERATION! Examining [a, b] = [{0}, {1}]".format(a, b))
+        logger.info("** NEW ITERATION! Examining [a, b] = [{0}, {1}]".format(a, b))
 
         # Check for convergence
         m = 0.5 * (a - b)
@@ -70,12 +73,12 @@ def fzerotx(f, x0, x1):
 
         # Bisection or an interpolation step?
         if abs(e) < tol or abs(fc) <= abs(fb):
-            logging.info("Taking a bisection step.")
+            logger.info("Taking a bisection step.")
             d = m
             e = m
         else:
             s = fb / fc
-            logging.info("a={0}, c={1}. Taking a {2} step.".format(
+            logger.info("a={0}, c={1}. Taking a {2} step.".format(
                 a, c, "secant" if a == c else "IQI"))
             # Secant
             if a == c:
@@ -89,17 +92,17 @@ def fzerotx(f, x0, x1):
                 q = (q - 1.0) * (r - 1.0) * (s - 1.0)
 
             if p > 0:
-                logging.info("Flipping sign on q = {0}".format(q))
+                logger.info("Flipping sign on q = {0}".format(q))
                 q = -q
             else:
-                logging.info("Flipping sign on p = {0}".format(p))
+                logger.info("Flipping sign on p = {0}".format(p))
                 p = -p
 
             # Do we accept the interpolation (secant/IQI) step?
             if 2.0 * p < 3.0 * m * q - abs(tol * q) and p < abs(0.5 * e * q):
                 e = d
                 d = p / q
-                logging.info("Accepting interpolation step d={0}".format(d))
+                logger.info("Accepting interpolation step d={0}".format(d))
             else:
                 log_string = "Rejecting interpolation step d={0} (iterate={1}) since ".format(
                     p/q, b + (p/q))
@@ -107,10 +110,10 @@ def fzerotx(f, x0, x1):
                     log_string += "2.0 * {0} => 3.0 * {1} * {2} = {3}".format(p, m, q, 3.0*m*q)
                 else:
                     log_string += "{0} => abs(0.5 * {1} * {2}) = {3}".format(p, e, q, abs(0.5*e*q))
-                logging.info(log_string)
+                logger.info(log_string)
                 d = m
                 e = m
-                logging.info("Using bisection step d={0}".format(d))
+                logger.info("Using bisection step d={0}".format(d))
 
         # Evaluate f at next iterate
         c = b
@@ -120,9 +123,9 @@ def fzerotx(f, x0, x1):
         else:
             b -= math.copysign(tol, b - a)
         fb = f(b)
-        logging.info("Next iterate = {0}. f(x) = {1}".format(b, fb))
+        logger.info("Next iterate = {0}. f(x) = {1}".format(b, fb))
 
-    logging.info("CONVERGED! b = {0}, f(b) = {1}".format(b, fb))
+    logger.info("CONVERGED! b = {0}, f(b) = {1}".format(b, fb))
     return b
 
 

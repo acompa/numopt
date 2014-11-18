@@ -8,7 +8,7 @@ import unittest
 
 from numopt import root as undertest
 
-logging.basicConfig(filename="root.log", level=logging.INFO)
+logger = logging.getLogger('root')
 
 
 class TestOneDimRootFinding(unittest.TestCase):

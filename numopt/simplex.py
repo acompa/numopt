@@ -9,7 +9,10 @@ import logging
 import numpy as np
 
 
-logging.basicConfig(filename="simplex.log", level=logging.INFO)
+fh = logging.FileHandler('simplex.log')
+fh.setLevel(logging.INFO)
+logger = logging.getLogger('simplex')
+logger.addHandler(fh)
 
 
 class Constraints(object):
@@ -78,7 +81,7 @@ class Constraints(object):
         lambda_k = np.linalg.solve(self.W_k.T, c)
         e_i = lambda_k < 0
         if np.sum(e_i) == 0:
-            logging.info("FOUND OPTIMAL VERTEX!! Vertex = {0}, lambdas = {1}".format(
+            logger.info("FOUND OPTIMAL VERTEX!! Vertex = {0}, lambdas = {1}".format(
                 x_k, lambda_k))
             raise _FoundOptimalVertexException(x_k)     # Terminating case!
         elif np.sum(e_i) == 1:
@@ -87,7 +90,7 @@ class Constraints(object):
             relaxed_working_set_row = np.argmin(lambda_k)
         self.to_deactivate = self.working_set[relaxed_working_set_row]
 
-        # Pointers for logging and index accounting.
+        # Pointers for logger and index accounting.
         self._lambda_k = lambda_k[relaxed_working_set_row]
 
         # Find descent direction and step size.
@@ -136,7 +139,7 @@ class Constraints(object):
         # Find the correct step size, activate the corresponding constraint.
         gammas = dict((idx, _gamma(x_k, idx, denominator))
                       for (idx, denominator) in self.D_k.iteritems())
-        logging.info("Obtained possible step sizes (gammas) = {0}".format(gammas))
+        logger.info("Obtained possible step sizes (gammas) = {0}".format(gammas))
         print gammas
         to_activate, step_size = min(gammas.iteritems(), key=lambda x: x[1])
         self.to_activate = to_activate
@@ -147,7 +150,7 @@ class Constraints(object):
         """
         Log diagnostics for new vertex.
         """
-        logging.info("New vertex = {0}. l_k = {1}, alpha_k = {2}, p_k = {3}, c^Tx = {4}".format(
+        logger.info("New vertex = {0}. l_k = {1}, alpha_k = {2}, p_k = {3}, c^Tx = {4}".format(
             x_k, self._lambda_k, step_size, p_k, np.dot(c.T, x_k)))
 
     def complete_iteration(self):
@@ -197,9 +200,9 @@ def all_inequality(c, x_k, constraints):
         # Create working set
         W_k = constraints.W_k
         rank = np.linalg.matrix_rank(W_k)
-        logging.info("Working set: {0}. Matrix: {1}".format(
+        logger.info("Working set: {0}. Matrix: {1}".format(
             constraints.working_set, W_k))
-        logging.info("Deactivated set: {0}".format(constraints.deactivated_set))
+        logger.info("Deactivated set: {0}".format(constraints.deactivated_set))
 
         if rank != W_k.shape[0]:
             raise ValueError("W_k is nonsingular! Shape: %s, rank: %i".format(

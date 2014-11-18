@@ -1,1 +1,3 @@
-__author__ = 'alexc'
+import logging
+
+logging.basicConfig(level=logging.INFO)
